@@ -29,7 +29,7 @@ Excel users: full_accuracy_value exceeds Excel's 15-digit number limit and will 
 | strike_value | priceToBeat: integer string scaled by 1e18; null when no tick existed at the start second |
 | raw | full Gamma API market object |
 
-Note: settlement rule = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is higher than strike_value. A few markets fall in disclosed feed-coverage gaps (no tick near end_sec) or have a null strike_value — see the coverage report; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
+Note: settlement rule = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is greater than **or equal to** strike_value — the official market rules read "greater than or equal to", so a tie settles Up. A few markets fall in disclosed feed-coverage gaps (no tick near end_sec) or have a null strike_value — see the coverage report; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
 
 ## <SERIES>-book-<date>.jsonl.gz — full-depth order book snapshots
 
