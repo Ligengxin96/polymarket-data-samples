@@ -31,6 +31,8 @@ Excel users: full_accuracy_value exceeds Excel's 15-digit number limit and will 
 
 Note: settlement rule = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is greater than **or equal to** strike_value — the official market rules read "greater than or equal to", so a tie settles Up. A few markets fall in disclosed feed-coverage gaps (no tick near end_sec) or have a null strike_value — see the coverage report; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
 
+Settlement source change: markets from **2026-08-07 00:00 UTC** onward (those with `raw.cryptoMarketConfig.twapEnabled = true`) settle on the Chainlink **TWAP streams** instead — Up wins iff the TWAP stream's value at the close ≥ its value at the open (30s-lookback stream for 5-minute markets, 60s for 15-minute). The full dataset ships those streams as `twap30s`/`twap60s` price files (same columns as `prices`, coverage from 2026-08-08) — recompute post-switch markets from them, not from the instantaneous `prices` files. The sample day 2026-07-24 predates the switch.
+
 ## <SERIES>-book-<date>.jsonl.gz — full-depth order book snapshots
 
 | field | meaning |

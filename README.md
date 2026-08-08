@@ -18,16 +18,41 @@ documentation**; the full dataset is sold by subscription or by range.
 
 | dataset | description |
 |---|---|
-| `prices` | The Chainlink Data Streams feed that **settles** the markets, tick-by-tick (~1Hz per symbol), full-precision values, three independent timestamps per tick |
+| `prices` | The instantaneous Chainlink Data Streams feed, tick-by-tick (~1Hz per symbol), full-precision values, three independent timestamps per tick. **Settled the markets through 2026-08-06**; still the underlying price line |
+| `twap` | The **Chainlink TWAP streams that settle the markets since 2026-08-07** — 30s-lookback stream for 5-minute markets, 60s for 15-minute (~1Hz, full precision, same columns as `prices`) |
 | `book` | Full-depth CLOB order-book snapshots, up to 1/sec per token |
 | `price_change` | Order-book deltas with best bid/ask, sub-second |
 | `last_trade_price` | **Every** trade print — never sampled or throttled |
 | `markets` | Per-market metadata with **settlement outcome** (who won) and **strike** (the official priceToBeat) |
 
-- Assets: BTC, ETH, SOL, DOGE, XRP, BNB, HYPE × intervals 5m / 15m
-- History from 2026-06-06, growing daily
+- Assets: BTC, ETH, SOL, DOGE, XRP, BNB, HYPE (ZEC since 2026-08) × intervals 5m / 15m
+- History from 2026-06-06, growing daily; TWAP streams from 2026-08-08
+  (first complete UTC day 2026-08-09)
 - Every file ships with row counts + SHA-256; a daily **coverage report**
   discloses every gap honestly — nothing is hidden
+
+### Settlement source change on 2026-08-07 / 结算源切换（2026-08-07）
+
+From 2026-08-07 00:00 UTC, Polymarket settles its crypto Up/Down markets on
+Chainlink **TWAP** (time-weighted average price) streams instead of the
+instantaneous feed: the market resolves Up when the TWAP value at the close is
+greater than or equal to the TWAP value at the open (30s lookback for 5-minute
+markets, 60s for 15-minute; each market carries this in
+`raw.cryptoMarketConfig`). **To recompute outcomes, use the `twap` files for
+markets from 2026-08-07 onward and the `prices` files for earlier markets.**
+The TWAP streams cannot be reconstructed exactly from the ~1Hz instantaneous
+ticks — Chainlink computes them from its internal higher-frequency data — which
+is why the dataset carries both lines. 2026-08-07 itself predates our TWAP
+collection; for that single day the official outcome labels in the `markets`
+files are the settlement authority.
+
+2026-08-07 00:00 UTC 起，Polymarket 加密 Up/Down 市场改用 Chainlink **TWAP**
+（时间加权均价）流结算：收盘 TWAP 值 ≥ 开盘 TWAP 值判 Up（5 分钟市场用 30 秒回看，
+15 分钟用 60 秒；每个市场的 `raw.cryptoMarketConfig` 里带此标记）。**重算输赢：
+2026-08-07 起的市场用 `twap` 文件，此前的市场用 `prices` 文件。** TWAP 流无法从
+约 1Hz 的瞬时 tick 精确重建（Chainlink 用其内部更高频数据计算），因此数据集同时
+提供两条线。2026-08-07 当天早于我们的 TWAP 采集起点，该天以 `markets` 文件中的
+官方结算标签为准。
 
 ## Samples / 样例
 
@@ -70,7 +95,11 @@ yourself rather than take our word for it.
 ## Verify it yourself / 自行验证
 
 The point of a settlement feed is that you can re-derive the outcome from it.
-Here is that check run against these exact files.
+Here is that check run against these exact files. (The sample day 2026-07-24
+predates the 2026-08-07 TWAP switch, so the rule shown below is the one that
+settled these markets; markets from 2026-08-07 onward are verified the same
+way against the `twap` files instead. 样例日早于 TWAP 切换，下述验证使用当时
+的即时价规则；08-07 起的市场以同样方法对 `twap` 文件验证。)
 
 Settlement rule: **Up wins when the price at the close is greater than *or equal
 to* `strike_value`** (the official market rules say "greater than or equal to",
