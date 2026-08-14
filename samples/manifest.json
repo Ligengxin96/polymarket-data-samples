@@ -1,36 +1,48 @@
 {
-  "date": "2026-07-24",
-  "note": "free sample: one real unmodified UTC day (2026-07-24), BTC 5m series + BTC settlement feed",
+  "date": "2026-08-12",
+  "note": "free sample: one real unmodified UTC day (2026-08-12), BTC 5m series + BTC settlement feeds (instantaneous + both TWAP streams)",
   "files": [
     {
-      "name": "BTCUSD-prices-2026-07-24.csv.gz",
-      "rows": 78515,
-      "bytes": 1682058,
-      "sha256": "d647dbc498d2313852bbb622c3cfed54a991ce321dfcfcf5293a59d375d85b3a"
+      "name": "BTCUSD-prices-2026-08-12.csv.gz",
+      "rows": 76131,
+      "bytes": 1655751,
+      "sha256": "a8b4f866772578e413a796ae9ba8cbbcb4276e936f9cce6d7d07721c29e11e1a"
     },
     {
-      "name": "BTC-5m-book-2026-07-24.jsonl.gz",
-      "rows": 157588,
-      "bytes": 39650838,
-      "sha256": "7b8e4fd7d179005606ad877472e01df5523744f5ad735221c5028059230de0ce"
+      "name": "BTCUSD-twap30s-prices-2026-08-12.csv.gz",
+      "rows": 76156,
+      "bytes": 1795213,
+      "sha256": "8758b0c2bae331d93927045f941aceffc4f0790afee35e282bc6958c9856e108"
     },
     {
-      "name": "BTC-5m-price_change-2026-07-24.jsonl.gz",
-      "rows": 238058,
-      "bytes": 18597984,
-      "sha256": "dfa5b80bb1a38c7ff5e090df8160a7e0a9679958d1b2710b8fc702c9c30d0378"
+      "name": "BTCUSD-twap60s-prices-2026-08-12.csv.gz",
+      "rows": 76162,
+      "bytes": 1803784,
+      "sha256": "cc05783495788ccac22c37823c4d531aac879a08622348e23ea59d6d09b3724b"
     },
     {
-      "name": "BTC-5m-last_trade_price-2026-07-24.jsonl.gz",
-      "rows": 605976,
-      "bytes": 33859693,
-      "sha256": "38b5653eb9332ad06b986f692df13834440607c254c41f9f0abf7c33e755c357"
+      "name": "BTC-5m-book-2026-08-12.jsonl.gz",
+      "rows": 145917,
+      "bytes": 34438486,
+      "sha256": "68ae9175663cca6a554615386aecceeb2ba8dbc11aa968d5764c437ac222aaaa"
     },
     {
-      "name": "BTC-5m-markets-2026-07-24.jsonl.gz",
+      "name": "BTC-5m-price_change-2026-08-12.jsonl.gz",
+      "rows": 274896,
+      "bytes": 20664809,
+      "sha256": "68ef9eae69180ea3ce93bbae247517e4022f16d26edeb45040af9934cf0b11ba"
+    },
+    {
+      "name": "BTC-5m-last_trade_price-2026-08-12.jsonl.gz",
+      "rows": 455215,
+      "bytes": 25612794,
+      "sha256": "48f9d1ea2d9a2e8955091405355fb81e31e4f9106fe808ac92403fdf6ec87b33"
+    },
+    {
+      "name": "BTC-5m-markets-2026-08-12.jsonl.gz",
       "rows": 292,
-      "bytes": 102282,
-      "sha256": "54c52ca593b3ccc5e2889db3538676103e30ea43aa53ae53d9cb51c1c0adaebe"
+      "bytes": 105128,
+      "sha256": "5674345ceb957da69e055040435cbc68bf7733abdef301fa702cf538a5f758d3"
     }
   ]
 }
