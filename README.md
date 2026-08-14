@@ -146,14 +146,14 @@ the previous day's file.)
 
 Feed density is a property of the upstream publisher, not something a collector
 can invent — so every day of the paid dataset ships a machine-readable
-**coverage report** alongside the data: tick-gap percentiles and an explicit
-list of gap windows. You can exclude affected periods from a backtest up front
-instead of discovering them the hard way, and you never have to take a
-completeness claim on trust.
+**coverage report** alongside the data: per-symbol row counts, tick-gap
+percentiles (p50/p95/max) and the day's largest gap windows. You can size and
+locate the affected periods up front instead of discovering them mid-backtest,
+and you never have to take a completeness claim on trust.
 
-付费数据集每天随数据附带机器可读的 **coverage 报告**（tick 间隔分位数 + 断档窗口
-清单）。feed 密度属上游发布方特性，报告让你在回测前就能直接剔除受影响时段，而不必
-对完整性声明照单全收。
+付费数据集每天随数据附带机器可读的 **coverage 报告**：每个币种的行数、tick 间隔
+分位数（p50/p95/max）与当日最大的若干个断档窗口。feed 密度属上游发布方特性，报告
+让你在回测前就能定位并评估受影响时段，而不必对完整性声明照单全收。
 
 ## Buy / 购买
 
