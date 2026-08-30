@@ -2,6 +2,28 @@
 
 (中文版见 数据使用说明.md)
 
+## Layout
+
+The sample bundle unpacks to a directory laid out exactly like the paid
+archive, so anything written against a sample keeps working against a delivered
+dataset unchanged:
+
+```
+polymarket-data-samples/
+  data/polymarket/daily/markets/BTC-5m/BTC-5m-markets-<date>.jsonl.gz
+  data/polymarket/daily/book/BTC-5m/BTC-5m-book-<date>.jsonl.gz
+  data/polymarket/daily/price_change/BTC-5m/BTC-5m-price_change-<date>.jsonl.gz
+  data/polymarket/daily/last_trade_price/BTC-5m/BTC-5m-last_trade_price-<date>.jsonl.gz
+  data/chainlink/daily/prices/BTCUSD/BTCUSD-prices-<date>.csv.gz
+  data/chainlink-twap-30s/daily/prices/BTCUSD/BTCUSD-twap30s-prices-<date>.csv.gz
+  data/chainlink-twap-60s/daily/prices/BTCUSD/BTCUSD-twap60s-prices-<date>.csv.gz
+```
+
+The directory segments carry meaning, and tooling reads them: `data/<venue>/daily/<dataset>/<ASSET>-<interval>/`
+for market data, `data/<settlement stream>/daily/prices/<SYMBOL>/` for the
+price lines. A full purchased dataset has the same shape with more assets,
+more intervals and more days under it.
+
 ## <SYMBOL>-prices-<date>.csv.gz — Chainlink settlement price
 
 | column | meaning |
@@ -31,7 +53,14 @@ Excel users: full_accuracy_value exceeds Excel's 15-digit number limit and will 
 
 Note: settlement rule = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is greater than **or equal to** strike_value — the official market rules read "greater than or equal to", so a tie settles Up. A few markets fall in disclosed feed-coverage gaps (no tick near end_sec) or have a null strike_value — see the coverage report; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
 
-Settlement source change: markets from **2026-08-07 00:00 UTC** onward (those with `raw.cryptoMarketConfig.twapEnabled = true`) settle on the Chainlink **TWAP streams** instead — Up wins iff the TWAP stream's value at the close ≥ its value at the open (30s-lookback stream for 5-minute markets, 60s for 15-minute). The full dataset ships those streams as `twap30s`/`twap60s` price files (same columns as `prices`, coverage from 2026-08-08) — recompute post-switch markets from them, not from the instantaneous `prices` files. The sample day 2026-08-12 is after the switch, and this repository ships both TWAP streams for it so the recomputation can be run end to end.
+Settlement source change: markets from **2026-08-07 00:00 UTC** onward (those with `raw.cryptoMarketConfig.twapEnabled = true`) settle on the Chainlink **TWAP streams** instead — Up wins iff the TWAP stream's value at the close ≥ its value at the open.
+
+**Which stream settles a market is written on the market itself**, in `raw.cryptoMarketConfig.twapLookbackSeconds` — read it per market rather than inferring it from the date, because upstream has moved it once already:
+
+- from 2026-08-07: 5-minute markets settled on the 30s-lookback stream, 15-minute markets on the 60s stream
+- from 2026-08-13 upstream began migrating 5-minute markets to the 60s stream, completing on 2026-08-14; **since 2026-08-15 every market, 5-minute and 15-minute alike, settles on the 60s stream**
+
+The `twap30s` stream is still collected and still ships with every day of the dataset, but it no longer decides any market's outcome. The full dataset ships both as `twap30s`/`twap60s` price files (same columns as `prices`, coverage from 2026-08-08) — recompute post-switch markets from the stream the market's own config names, not from the instantaneous `prices` files.
 
 ## <SERIES>-book-<date>.jsonl.gz — full-depth order book snapshots
 
@@ -54,7 +83,14 @@ Note: book state at time t = the token's latest snapshot with recv_ms <= t.
 | recv_ms | collector receive time |
 | payload.price_changes[] | one entry per changed level: {side, price, size, best_bid, best_ask, asset_id} |
 
-Note: sub-second order-book deltas. Apply them in event_ts_ms order on top of the latest book snapshot to track best bid/ask between snapshots. Throttled keep-first to 500ms per market (disclosed); trades are never throttled.
+Note: sub-second order-book deltas. Apply them in event_ts_ms order on top of the latest book snapshot to track best bid/ask between snapshots. Trades are never throttled.
+
+Throttling (disclosed): frames are kept at most 1 per market per N ms (keep-first within each window), and N varies **by date and by asset**:
+
+- from 2026-06-06: all assets 500ms
+- from 2026-08-25: BTC 20ms, ETH 100ms; all others 500ms
+
+So a BTC day from 2026-08-25 onward carries roughly 25x the deltas of an earlier one. If you reconstruct books across a date range that spans the change, expect the resolution to change with it.
 
 ## <SERIES>-last_trade_price-<date>.jsonl.gz — every trade
 

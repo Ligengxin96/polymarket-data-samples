@@ -1,0 +1,7 @@
+# The sample data ships as a GitHub Release asset, never in the git tree:
+# a partially-populated archive replays without errors and gives wrong answers,
+# so this repository holds either the whole day (in the Release) or none of it.
+data/
+*.tar.gz
+*.jsonl.gz
+*.csv.gz

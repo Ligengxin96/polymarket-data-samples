@@ -1,48 +1,62 @@
 {
-  "date": "2026-08-12",
-  "note": "free sample: one real unmodified UTC day (2026-08-12), BTC 5m series + BTC settlement feeds (instantaneous + both TWAP streams)",
+  "date": "2026-08-25",
+  "note": "free sample: one real unmodified UTC day (2026-08-25), BTC 5m series + BTC settlement feeds (instantaneous + both TWAP streams), laid out exactly as the paid archive is",
+  "bundle": {
+    "name": "polymarket-data-samples.tar.gz",
+    "topLevelDir": "polymarket-data-samples",
+    "bytes": 354659865,
+    "sha256": "35fe57fababae453392b56c8fce0a061819792f9df4213e7c8b659e42a5fe4ed",
+    "url": "https://github.com/Ligengxin96/polymarket-data-samples/releases/latest/download/polymarket-data-samples.tar.gz"
+  },
   "files": [
     {
-      "name": "BTCUSD-prices-2026-08-12.csv.gz",
-      "rows": 76131,
-      "bytes": 1655751,
-      "sha256": "a8b4f866772578e413a796ae9ba8cbbcb4276e936f9cce6d7d07721c29e11e1a"
+      "path": "data/chainlink/daily/prices/BTCUSD/BTCUSD-prices-2026-08-25.csv.gz",
+      "name": "BTCUSD-prices-2026-08-25.csv.gz",
+      "rows": 81719,
+      "bytes": 1848307,
+      "sha256": "73fd5b0d33a7c1bbe7b4b3fa39f0002f15e9cf038e082ccae79948e3ff64e79e"
     },
     {
-      "name": "BTCUSD-twap30s-prices-2026-08-12.csv.gz",
-      "rows": 76156,
-      "bytes": 1795213,
-      "sha256": "8758b0c2bae331d93927045f941aceffc4f0790afee35e282bc6958c9856e108"
+      "path": "data/chainlink-twap-30s/daily/prices/BTCUSD/BTCUSD-twap30s-prices-2026-08-25.csv.gz",
+      "name": "BTCUSD-twap30s-prices-2026-08-25.csv.gz",
+      "rows": 81720,
+      "bytes": 1975402,
+      "sha256": "6e7e2954206860edc52650b5a3cb7e2e36d3e3313ab007486dcf7d1e96458ef7"
     },
     {
-      "name": "BTCUSD-twap60s-prices-2026-08-12.csv.gz",
-      "rows": 76162,
-      "bytes": 1803784,
-      "sha256": "cc05783495788ccac22c37823c4d531aac879a08622348e23ea59d6d09b3724b"
+      "path": "data/chainlink-twap-60s/daily/prices/BTCUSD/BTCUSD-twap60s-prices-2026-08-25.csv.gz",
+      "name": "BTCUSD-twap60s-prices-2026-08-25.csv.gz",
+      "rows": 81715,
+      "bytes": 1991311,
+      "sha256": "24197dc071acc45b86fbadfa1509b32c602542b71d7e057369efcbafca43b6e4"
     },
     {
-      "name": "BTC-5m-book-2026-08-12.jsonl.gz",
-      "rows": 145917,
-      "bytes": 34438486,
-      "sha256": "68ae9175663cca6a554615386aecceeb2ba8dbc11aa968d5764c437ac222aaaa"
-    },
-    {
-      "name": "BTC-5m-price_change-2026-08-12.jsonl.gz",
-      "rows": 274896,
-      "bytes": 20664809,
-      "sha256": "68ef9eae69180ea3ce93bbae247517e4022f16d26edeb45040af9934cf0b11ba"
-    },
-    {
-      "name": "BTC-5m-last_trade_price-2026-08-12.jsonl.gz",
-      "rows": 455215,
-      "bytes": 25612794,
-      "sha256": "48f9d1ea2d9a2e8955091405355fb81e31e4f9106fe808ac92403fdf6ec87b33"
-    },
-    {
-      "name": "BTC-5m-markets-2026-08-12.jsonl.gz",
+      "path": "data/polymarket/daily/markets/BTC-5m/BTC-5m-markets-2026-08-25.jsonl.gz",
+      "name": "BTC-5m-markets-2026-08-25.jsonl.gz",
       "rows": 292,
-      "bytes": 105128,
-      "sha256": "5674345ceb957da69e055040435cbc68bf7733abdef301fa702cf538a5f758d3"
+      "bytes": 104159,
+      "sha256": "029c7a6a2c695cacc987f165f8d88f921e67a080bb0c367f724fb5638134a675"
+    },
+    {
+      "path": "data/polymarket/daily/book/BTC-5m/BTC-5m-book-2026-08-25.jsonl.gz",
+      "name": "BTC-5m-book-2026-08-25.jsonl.gz",
+      "rows": 145053,
+      "bytes": 38303511,
+      "sha256": "0539a61d9a348abbc4570f149e0f6ced0af5216adc680b14f796a0164fa092bc"
+    },
+    {
+      "path": "data/polymarket/daily/price_change/BTC-5m/BTC-5m-price_change-2026-08-25.jsonl.gz",
+      "name": "BTC-5m-price_change-2026-08-25.jsonl.gz",
+      "rows": 3904216,
+      "bytes": 279570446,
+      "sha256": "5a49cdd219c3b4ed1e2c4efe327704f157b5f2a68af04aeeb22d9b72095ae1b8"
+    },
+    {
+      "path": "data/polymarket/daily/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-08-25.jsonl.gz",
+      "name": "BTC-5m-last_trade_price-2026-08-25.jsonl.gz",
+      "rows": 561914,
+      "bytes": 31445835,
+      "sha256": "6a1ba45c9a7a43a40e293e24c748c8e168bb2e7a731a39e4a57c0ea15d406c96"
     }
   ]
 }
