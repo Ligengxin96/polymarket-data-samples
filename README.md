@@ -21,7 +21,7 @@ documentation**; the full dataset is sold by subscription or by range.
 | `prices` | The instantaneous Chainlink Data Streams feed, tick-by-tick (~1Hz per symbol), full-precision values, three independent timestamps per tick. **Settled the markets through 2026-08-06**; still the underlying price line |
 | `twap` | The **Chainlink TWAP streams that settle the markets since 2026-08-07** — the 60s-lookback stream settles both 5-minute and 15-minute markets today; the 30s stream is still collected and shipped but no longer decides any outcome (~1Hz, full precision, same columns as `prices`) |
 | `book` | Full-depth CLOB order-book snapshots, up to 1/sec per token |
-| `price_change` | Order-book deltas with best bid/ask, sub-second |
+| `price_change` | Order-book deltas with best bid/ask. Kept at most 1 per market per 500ms — and **since 2026-08-25, per 20ms for BTC and 100ms for ETH**, roughly a 25x increase in resolution |
 | `last_trade_price` | **Every** trade print — never sampled or throttled |
 | `markets` | Per-market metadata with **settlement outcome** (who won) and **strike** (the official priceToBeat) |
 
@@ -93,9 +93,16 @@ ot run . --data ./polymarket-data-samples
 | `data/chainlink-twap-30s/…/BTCUSD-twap30s-prices-2026-08-25.csv.gz` | 81,720 | TWAP 30s stream — still archived, no longer settles anything |
 | `data/chainlink/…/BTCUSD-prices-2026-08-25.csv.gz` | 81,719 | instantaneous Chainlink feed |
 | `data/polymarket/…/book/BTC-5m/BTC-5m-book-2026-08-25.jsonl.gz` | 145,053 | order-book snapshots |
-| `data/polymarket/…/price_change/BTC-5m/BTC-5m-price_change-2026-08-25.jsonl.gz` | 3,904,216 | order-book deltas (best bid/ask) |
+| `data/polymarket/…/price_change/BTC-5m/BTC-5m-price_change-2026-08-25.jsonl.gz` | 3,904,216 | order-book deltas (best bid/ask), at the 20ms BTC resolution |
 | `data/polymarket/…/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-08-25.jsonl.gz` | 561,914 | every trade |
 | `data/polymarket/…/markets/BTC-5m/BTC-5m-markets-2026-08-25.jsonl.gz` | 292 | markets + outcomes + strikes |
+
+This day is the first full one at the finer order-book resolution: BTC deltas
+were sampled at 20ms rather than 500ms from 2026-08-25, which is why the
+`price_change` file carries 3.9M rows where an earlier day carried ~275k.
+
+本样例日是更高盘口分辨率下的第一个完整日：BTC 盘口增量自 2026-08-25 起由 500ms
+改为 20ms 采样，因此 `price_change` 有 390 万行，而此前的日子约 27.5 万行。
 
 Each file is also attached to the Release individually, for anyone who only
 wants one of them.
@@ -184,6 +191,16 @@ and you never have to take a completeness claim on trust.
 
 ## Buy / 购买
 
-Telegram: **@hankson_level** — delivery is an expiring private download link
-(tar bundle with checksums and the data guide), scoped to exactly the assets,
-data types and date range you purchase.
+**[outcometick.com](https://outcometick.com)** — subscribe or buy a date range,
+then pull the data with your API key. It is the same archive these samples come
+from, scoped to exactly the assets, data types and dates you purchase.
+
+Questions, or something not working:
+**[Telegram group](https://t.me/+TcK_hJOzOz5mZTk1)** ·
+**support@outcometick.com**
+
+**[outcometick.com](https://outcometick.com)** —— 按订阅或按日期区间购买，用 API
+key 自助取数。样例即取自同一份归档，购买后按你选择的币种、数据类型与日期范围开放。
+
+有疑问或遇到问题：**[Telegram 群](https://t.me/+TcK_hJOzOz5mZTk1)** ·
+**support@outcometick.com**
