@@ -81,20 +81,35 @@ Note: book state at time t = the token's latest snapshot with recv_ms <= t.
 |---|---|
 | slug | market |
 | asset_id | the token this quote belongs to (each market has two) |
+| event_type | always `best_bid_ask` in this file |
+| event_ts_ms | **venue event time, epoch ms — use this one** |
 | recv_ms | collector receive time |
-| payload.best_bid / best_ask | best buy / sell price, decimal strings |
+| payload.best_bid / best_ask | best buy / sell price |
 | payload.spread | best_ask - best_bid, as sent upstream |
-| payload.timestamp | venue event time, epoch ms |
+| payload.timestamp | the venue's own event time, **as a string** |
+| payload.market / asset_id / event_type | as sent upstream |
+
+**Every value inside `payload` is a string**, including the timestamp. We
+normalise the venue's event time into the top-level numeric `event_ts_ms`, so
+read that instead of parsing `payload.timestamp` — measured over 541,310 frames
+the two are identical on every single row.
 
 The venue emits one of these whenever a token's top of book moves. Prices only —
 there are **no sizes** here; for depth use `book` snapshots and `price_change`
 deltas. The two legs of a market are normally pushed together (measured on
 2026-09-04: 646,992 pairs against 2,611 single-leg pushes).
 
-An **empty side is encoded as the string `"0"`**, not as null or a missing
-field. Judge it by the price domain — a real CLOB quote lives in [0.001, 0.999],
-so `"0"` on either side means that side is empty. On the sample day 11,694 of
-1,315,510 frames carry an empty side.
+**An empty side is encoded as a price, not as null or a missing field**, and
+because the two outcomes of a market always sum to 1, it shows up differently on
+each leg: `best_bid = "0"` means *nobody is bidding*, and `best_ask = "1"` means
+*nobody is offering below the cap*. They are the same event seen from the two
+complementary tokens, and the counts prove it — on the sample day 11,694 frames
+carry `best_bid = "0"` and exactly 11,694 carry `best_ask = "1"` (23,388 rows,
+1.78%, no row has both).
+
+So the domain to test against is the **closed interval [0, 1]**, not the
+[0.001, 0.999] of a live quote. `"1"` is not a corrupt value here; treating it
+as one discards the rows where the book state is least ambiguous.
 
 **Why this file exists.** `price_change` already carries best_bid/best_ask on
 every entry, but it is throttled, so a top of book rebuilt from deltas alone
