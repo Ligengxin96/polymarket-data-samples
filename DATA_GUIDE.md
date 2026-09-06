@@ -12,6 +12,7 @@ dataset unchanged:
 polymarket-data-samples/
   data/polymarket/daily/markets/BTC-5m/BTC-5m-markets-<date>.jsonl.gz
   data/polymarket/daily/book/BTC-5m/BTC-5m-book-<date>.jsonl.gz
+  data/polymarket/daily/best_bid_ask/BTC-5m/BTC-5m-best_bid_ask-<date>.jsonl.gz
   data/polymarket/daily/price_change/BTC-5m/BTC-5m-price_change-<date>.jsonl.gz
   data/polymarket/daily/last_trade_price/BTC-5m/BTC-5m-last_trade_price-<date>.jsonl.gz
   data/chainlink/daily/prices/BTCUSD/BTCUSD-prices-<date>.csv.gz
@@ -73,6 +74,40 @@ The `twap30s` stream is still collected and still ships with every day of the da
 | payload.bids[] / payload.asks[] | all price levels, {price, size} strings |
 
 Note: book state at time t = the token's latest snapshot with recv_ms <= t.
+
+## <SERIES>-best_bid_ask-<date>.jsonl.gz — top of book, unthrottled
+
+| field | meaning |
+|---|---|
+| slug | market |
+| asset_id | the token this quote belongs to (each market has two) |
+| recv_ms | collector receive time |
+| payload.best_bid / best_ask | best buy / sell price, decimal strings |
+| payload.spread | best_ask - best_bid, as sent upstream |
+| payload.timestamp | venue event time, epoch ms |
+
+The venue emits one of these whenever a token's top of book moves. Prices only —
+there are **no sizes** here; for depth use `book` snapshots and `price_change`
+deltas. The two legs of a market are normally pushed together (measured on
+2026-09-04: 646,992 pairs against 2,611 single-leg pushes).
+
+An **empty side is encoded as the string `"0"`**, not as null or a missing
+field. Judge it by the price domain — a real CLOB quote lives in [0.001, 0.999],
+so `"0"` on either side means that side is empty. On the sample day 11,694 of
+1,315,510 frames carry an empty side.
+
+**Why this file exists.** `price_change` already carries best_bid/best_ask on
+every entry, but it is throttled, so a top of book rebuilt from deltas alone
+skips moves. Counting a "move" as a change in the (best bid, best ask) pair for
+one token, the same way on both files, the sample day holds **487,856** moves in
+this file and only **313,116 — 64.2%** are recoverable from the deltas. BTC is
+the best case (deltas kept at 1/20ms for BTC, 1/100ms for ETH, 1/500ms for
+everything else); on other assets far less survives.
+
+Availability: from 2026-09-02 (collection started 00:42:18 UTC that day, so it
+is missing its first 42 minutes); the first complete UTC day is 2026-09-03.
+Earlier days have no equivalent — `price_change` is the only top-of-book record
+there, and it is throttled.
 
 ## <SERIES>-price_change-<date>.jsonl.gz — order-book deltas (best bid/ask)
 
