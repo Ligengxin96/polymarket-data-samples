@@ -18,19 +18,20 @@ documentation**; the full dataset is sold by subscription or by range.
 
 | dataset | description |
 |---|---|
-| `prices` | The instantaneous Chainlink Data Streams feed, tick-by-tick (~1Hz per symbol), full-precision values, three independent timestamps per tick. **Settled the markets through 2026-08-06**; still the underlying price line |
-| `twap` | The **Chainlink TWAP streams that settle the markets since 2026-08-07** — the 60s-lookback stream settles both 5-minute and 15-minute markets today; the 30s stream is still collected and shipped but no longer decides any outcome (~1Hz, full precision, same columns as `prices`) |
+| `prices` | The instantaneous Chainlink Data Streams feed, tick-by-tick (~1Hz per symbol), the relay's full-precision fixed-point value whenever the relay publishes it, three independent timestamps per tick. **Settled the markets through 2026-08-06**; still the underlying price line |
+| `twap` | The **Chainlink TWAP streams that settle the markets since 2026-08-07** — the 60s-lookback stream settles both 5-minute and 15-minute markets today; the 30s stream is still collected and shipped but no longer decides any outcome (~1Hz, same columns as `prices`) |
 | `book` | Full-depth CLOB order-book snapshots, up to 1/sec per token |
 | `price_change` | Order-book deltas with best bid/ask. Kept at most 1 per market per 500ms — and **since 2026-08-25, per 20ms for BTC and 100ms for ETH**, roughly a 25x increase in resolution |
 | `best_bid_ask` | **Unthrottled top of book** — every top-of-book move the venue pushed, prices only (no sizes). The same quote `price_change` carries, at full resolution instead of the capture cadence. From 2026-09-02 |
-| `last_trade_price` | **Every** trade print — never sampled or throttled |
+| `last_trade_price` | Trade prints as the venue's WebSocket broadcast them — stored unthrottled, never sampled; not reconciled against on-chain fills |
 | `markets` | Per-market metadata with **settlement outcome** (who won) and **strike** (the official priceToBeat) |
 
 - Assets: BTC, ETH, SOL, DOGE, XRP, BNB, HYPE × intervals 5m / 15m
 - History from 2026-06-06, growing daily; TWAP streams from 2026-08-08
   (first complete UTC day 2026-08-09)
-- Every file ships with row counts + SHA-256; a daily **coverage report**
-  discloses every gap honestly — nothing is hidden
+- Every file comes with its size and SHA-256, so you can verify what you
+  received; every price row carries its own timestamps, so gaps in the feed are
+  measurable directly from the data
 
 ### Settlement source change on 2026-08-07 / 结算源切换（2026-08-07）
 
@@ -69,6 +70,17 @@ files are the settlement authority.
 — one real, unmodified UTC day (**2026-09-08**) of the BTC 5-minute series plus all
 three BTC settlement price lines.
 
+The same sample day, together with the Predict.fun one, is also on
+[Kaggle](https://www.kaggle.com/datasets/ligengxin96/polymarket-predict-fun-tick-data)
+(unpacked) and
+[Hugging Face](https://huggingface.co/datasets/Ligengxin96/polymarket-predict-fun-tick-data)
+(original `.gz` files), under CC BY 4.0.
+
+同一个样例日（连同 Predict.fun 那份）也发布在
+[Kaggle](https://www.kaggle.com/datasets/ligengxin96/polymarket-predict-fun-tick-data)（解压版）
+与 [Hugging Face](https://huggingface.co/datasets/Ligengxin96/polymarket-predict-fun-tick-data)
+（原样 `.gz`），协议 CC BY 4.0。
+
 > **The data is in the Release, not in the git tree.** Clicking *Code → Download
 > ZIP* gets you the documentation and nothing else. This is deliberate: a
 > half-populated archive would replay without errors and give wrong answers, so
@@ -96,7 +108,7 @@ ot run . --data ./polymarket-data-samples
 | `data/polymarket/…/book/BTC-5m/BTC-5m-book-2026-09-08.jsonl.gz` | 141,402 | order-book snapshots |
 | `data/polymarket/…/best_bid_ask/BTC-5m/BTC-5m-best_bid_ask-2026-09-08.jsonl.gz` | 1,314,078 | **unthrottled top of book** |
 | `data/polymarket/…/price_change/BTC-5m/BTC-5m-price_change-2026-09-08.jsonl.gz` | 3,516,537 | order-book deltas (best bid/ask), at the 20ms BTC resolution |
-| `data/polymarket/…/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-09-08.jsonl.gz` | 480,491 | every trade |
+| `data/polymarket/…/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-09-08.jsonl.gz` | 480,491 | trade prints, as broadcast |
 | `data/polymarket/…/markets/BTC-5m/BTC-5m-markets-2026-09-08.jsonl.gz` | 292 | markets + outcomes + strikes |
 
 **What the unthrottled stream is worth, measured on this day.** A "move" is a
@@ -138,10 +150,13 @@ timestamp the upstream itself put on the message.
 | Chainlink instantaneous feed (`recv_ms − server_ts_ms`) | **262 ms** | 391 ms |
 
 Collection runs next to the venues' own infrastructure (`eu-west-1`). Every
-tick in this dataset carries all three timestamps, so you can verify the
-capture path yourself rather than take our word for it.
+settlement-price tick carries all three timestamps (event, relay server, our
+receive), and every order-book and trade row carries the venue's event time and
+our receive time, so you can verify the capture path yourself rather than take
+our word for it.
 
-采集点部署在 `eu-west-1`，紧邻场方基础设施。每条 tick 都带三个时间戳，延迟链路
+采集点部署在 `eu-west-1`，紧邻场方基础设施。每条结算价 tick 都带三个时间戳（事件、
+relay 服务端、我方接收），每条盘口与成交行带场方事件时间与我方接收时间，延迟链路
 可自行核验。
 
 ## Verify it yourself / 自行验证
@@ -155,8 +170,9 @@ with a **60-second lookback**, so the governing rule is the current one: **Up
 wins when the TWAP value at the close is greater than or equal to the TWAP value
 at the open.** Both values are read from
 `BTCUSD-twap60s-prices-2026-09-08.csv.gz` at the exact boundary seconds, using
-the full-precision integer column (`full_accuracy_value`) — no floating point
-anywhere in the comparison.
+the full-precision integer column (`full_accuracy_value`; every row in this
+sample carries the relay's own fixed-point integer) — no floating point anywhere
+in the comparison.
 
 On 2026-09-08 the BTC 5-minute series had **288 markets settling inside the
 day** (the file's other 4 rows close after midnight and settle in the next
@@ -176,7 +192,8 @@ one matches Polymarket.
 本样例中每个市场的 `raw.cryptoMarketConfig.twapEnabled` 均为 `true`、**回看 60 秒**，
 因此适用当前规则：**收盘时刻 TWAP 值 ≥ 开盘时刻 TWAP 值则 Up 赢**。两端取值均来自
 `BTCUSD-twap60s-prices-2026-09-08.csv.gz` 中精确边界秒的全精度整数列
-（`full_accuracy_value`），比较过程全程不使用浮点。
+（`full_accuracy_value`；本样例每一行都是 relay 自己发布的定点整数），比较过程全程
+不使用浮点。
 
 2026-09-08 当天 BTC 5 分钟局共 **288 个在本日内结算的市场**（文件中另外 4 行收盘在
 午夜之后，于次日文件结算）：两端都持有精确边界秒 TWAP 报价的 **253 个，253/253
@@ -186,18 +203,15 @@ one matches Polymarket.
 只有两端都持有精确边界秒报价，我们才称其可复现——邻近 tick 并不能证明边界究竟落在
 哪一侧，因此这类市场记为未判定而非算作一致。而这 253 个全部对得上。
 
-## Coverage reporting / 覆盖情况报告
+## Gaps in the feed / 断档
 
 Feed density is a property of the upstream publisher, not something a collector
-can invent — so every day of the paid dataset ships a machine-readable
-**coverage report** alongside the data: per-symbol row counts, tick-gap
-percentiles (p50/p95/max) and the day's largest gap windows. You can size and
-locate the affected periods up front instead of discovering them mid-backtest,
-and you never have to take a completeness claim on trust.
+can invent, and the feed does have gaps. Every price row carries its own
+timestamps, so you can locate and size them straight from the files before you
+backtest, rather than take a completeness claim on trust.
 
-付费数据集每天随数据附带机器可读的 **coverage 报告**：每个币种的行数、tick 间隔
-分位数（p50/p95/max）与当日最大的若干个断档窗口。feed 密度属上游发布方特性，报告
-让你在回测前就能定位并评估受影响时段，而不必对完整性声明照单全收。
+feed 密度属上游发布方特性，采集端无法凭空补出，feed 确实存在断档。每条价格行都带
+自己的时间戳，回测前可直接从文件里定位并评估断档，不必对完整性声明照单全收。
 
 ## Buy / 购买
 

@@ -52,7 +52,7 @@ Excel users: full_accuracy_value exceeds Excel's 15-digit number limit and will 
 | strike_value | priceToBeat: integer string scaled by 1e18; null when no tick existed at the start second |
 | raw | full Gamma API market object |
 
-Note: settlement rule = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is greater than **or equal to** strike_value — the official market rules read "greater than or equal to", so a tie settles Up. A few markets fall in disclosed feed-coverage gaps (no tick near end_sec) or have a null strike_value — see the coverage report; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
+Note: settlement rule **for markets through 2026-08-06** (before the TWAP switch below) = Up wins iff the latest feed tick at or before end_sec (the value in effect at the close; the feed runs ~1Hz, so it is not always exactly on end_sec) is greater than **or equal to** strike_value — the official market rules read "greater than or equal to", so a tie settles Up. A few markets fall in feed gaps (no tick near end_sec, visible from the ticks' own timestamps) or have a null strike_value; those cannot be recomputed from the feed alone. Markets crossing UTC midnight appear in both days' files — dedupe by slug.
 
 Settlement source change: markets from **2026-08-07 00:00 UTC** onward (those with `raw.cryptoMarketConfig.twapEnabled = true`) settle on the Chainlink **TWAP streams** instead — Up wins iff the TWAP stream's value at the close ≥ its value at the open.
 
@@ -142,7 +142,9 @@ Throttling (disclosed): frames are kept at most 1 per market per N ms (keep-firs
 
 So a BTC day from 2026-08-25 onward carries roughly 25x the deltas of an earlier one. If you reconstruct books across a date range that spans the change, expect the resolution to change with it.
 
-## <SERIES>-last_trade_price-<date>.jsonl.gz — every trade
+## <SERIES>-last_trade_price-<date>.jsonl.gz — trade prints
+
+Trades exactly as the venue's WebSocket broadcast them: stored unthrottled and never sampled, but not reconciled against on-chain fills.
 
 | field | meaning |
 |---|---|
@@ -153,4 +155,4 @@ So a BTC day from 2026-08-25 onward carries roughly 25x the deltas of an earlier
 | payload.timestamp | trade time (ms) |
 | recv_ms | collector receive time |
 
-## manifest.json — file inventory with per-file row counts and sha256 checksums
+## samples/manifest.json — per-file row counts and sha256 checksums for this sample
