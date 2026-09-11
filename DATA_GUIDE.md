@@ -97,15 +97,15 @@ the two are identical on every single row.
 The venue emits one of these whenever a token's top of book moves. Prices only —
 there are **no sizes** here; for depth use `book` snapshots and `price_change`
 deltas. The two legs of a market are normally pushed together (measured on
-2026-09-04: 646,992 pairs against 2,611 single-leg pushes).
+2026-09-08: 644,259 pairs against 2,579 single-leg pushes).
 
 **An empty side is encoded as a price, not as null or a missing field**, and
 because the two outcomes of a market always sum to 1, it shows up differently on
 each leg: `best_bid = "0"` means *nobody is bidding*, and `best_ask = "1"` means
 *nobody is offering below the cap*. They are the same event seen from the two
-complementary tokens, and the counts prove it — on the sample day 11,694 frames
-carry `best_bid = "0"` and exactly 11,694 carry `best_ask = "1"` (23,388 rows,
-1.78%, no row has both).
+complementary tokens, and the counts prove it — on the sample day 11,043 frames
+carry `best_bid = "0"` and exactly 11,043 carry `best_ask = "1"` (22,086 rows,
+1.68%, no row has both).
 
 So the domain to test against is the **closed interval [0, 1]**, not the
 [0.001, 0.999] of a live quote. `"1"` is not a corrupt value here; treating it
@@ -114,8 +114,8 @@ as one discards the rows where the book state is least ambiguous.
 **Why this file exists.** `price_change` already carries best_bid/best_ask on
 every entry, but it is throttled, so a top of book rebuilt from deltas alone
 skips moves. Counting a "move" as a change in the (best bid, best ask) pair for
-one token, the same way on both files, the sample day holds **487,856** moves in
-this file and only **313,116 — 64.2%** are recoverable from the deltas. BTC is
+one token, the same way on both files, the sample day holds **454,790** moves in
+this file and only **288,298 — 63.4%** are recoverable from the deltas. BTC is
 the best case (deltas kept at 1/20ms for BTC, 1/100ms for ETH, 1/500ms for
 everything else); on other assets far less survives.
 

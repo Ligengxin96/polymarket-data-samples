@@ -66,7 +66,7 @@ files are the settlement authority.
 ## Samples / 样例
 
 **[Download the sample bundle](https://github.com/Ligengxin96/polymarket-data-samples/releases/latest/download/polymarket-data-samples.tar.gz)**
-— one real, unmodified UTC day (**2026-09-04**) of the BTC 5-minute series plus all
+— one real, unmodified UTC day (**2026-09-08**) of the BTC 5-minute series plus all
 three BTC settlement price lines.
 
 > **The data is in the Release, not in the git tree.** Clicking *Code → Download
@@ -90,26 +90,26 @@ ot run . --data ./polymarket-data-samples
 
 | file (inside the bundle) | rows | what |
 |---|---|---|
-| `data/chainlink-twap-60s/…/BTCUSD-twap60s-prices-2026-09-04.csv.gz` | 82,256 | **TWAP 60s stream — settles every market today** |
-| `data/chainlink-twap-30s/…/BTCUSD-twap30s-prices-2026-09-04.csv.gz` | 82,263 | TWAP 30s stream — still archived, no longer settles anything |
-| `data/chainlink/…/BTCUSD-prices-2026-09-04.csv.gz` | 82,265 | instantaneous Chainlink feed |
-| `data/polymarket/…/book/BTC-5m/BTC-5m-book-2026-09-04.jsonl.gz` | 139,097 | order-book snapshots |
-| `data/polymarket/…/best_bid_ask/BTC-5m/BTC-5m-best_bid_ask-2026-09-04.jsonl.gz` | 1,315,510 | **unthrottled top of book** |
-| `data/polymarket/…/price_change/BTC-5m/BTC-5m-price_change-2026-09-04.jsonl.gz` | 3,542,337 | order-book deltas (best bid/ask), at the 20ms BTC resolution |
-| `data/polymarket/…/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-09-04.jsonl.gz` | 470,587 | every trade |
-| `data/polymarket/…/markets/BTC-5m/BTC-5m-markets-2026-09-04.jsonl.gz` | 292 | markets + outcomes + strikes |
+| `data/chainlink-twap-60s/…/BTCUSD-twap60s-prices-2026-09-08.csv.gz` | 81,969 | **TWAP 60s stream — settles every market today** |
+| `data/chainlink-twap-30s/…/BTCUSD-twap30s-prices-2026-09-08.csv.gz` | 81,946 | TWAP 30s stream — still archived, no longer settles anything |
+| `data/chainlink/…/BTCUSD-prices-2026-09-08.csv.gz` | 81,970 | instantaneous Chainlink feed |
+| `data/polymarket/…/book/BTC-5m/BTC-5m-book-2026-09-08.jsonl.gz` | 141,402 | order-book snapshots |
+| `data/polymarket/…/best_bid_ask/BTC-5m/BTC-5m-best_bid_ask-2026-09-08.jsonl.gz` | 1,314,078 | **unthrottled top of book** |
+| `data/polymarket/…/price_change/BTC-5m/BTC-5m-price_change-2026-09-08.jsonl.gz` | 3,516,537 | order-book deltas (best bid/ask), at the 20ms BTC resolution |
+| `data/polymarket/…/last_trade_price/BTC-5m/BTC-5m-last_trade_price-2026-09-08.jsonl.gz` | 480,491 | every trade |
+| `data/polymarket/…/markets/BTC-5m/BTC-5m-markets-2026-09-08.jsonl.gz` | 292 | markets + outcomes + strikes |
 
 **What the unthrottled stream is worth, measured on this day.** A "move" is a
 change in the pair (best bid, best ask) for one token, counted the same way on
-both files. `best_bid_ask` records **487,856** of them. The throttled deltas
-recover **313,116 — 64.2%**. And BTC is the *best* case: deltas are kept at one
+both files. `best_bid_ask` records **454,790** of them. The throttled deltas
+recover **288,298 — 63.4%**. And BTC is the *best* case: deltas are kept at one
 per 20ms for BTC, 100ms for ETH and 500ms for everything else, so on other
 assets far less of the top of book survives. That is the entire reason this
 stream exists.
 
 **未限流的那条流值多少钱，用本样例日实测。**「一次变动」＝某个 token 的
 (最优买价, 最优卖价) 发生变化，两个文件用同一口径计数。`best_bid_ask` 记录了
-**487,856 次**；限流的增量流只能还原 **313,116 次，即 64.2%**。而 BTC 已经是
+**454,790 次**；限流的增量流只能还原 **288,298 次，即 63.4%**。而 BTC 已经是
 **最好的情况**——增量流对 BTC 每 20ms 保留一条、ETH 100ms、其余币种 500ms，
 其它币种能留下的顶部变动远少于此。这就是这条流存在的全部理由。
 
@@ -131,11 +131,11 @@ timestamp the upstream itself put on the message.
 
 | stream | p50 | p95 |
 |---|---|---|
-| CLOB order book (`recv_ms − event_ts_ms`) | **10 ms** | 36 ms |
-| Top of book, unthrottled (`recv_ms − payload.timestamp`) | **9 ms** | 87 ms |
-| Chainlink TWAP 60s stream (`recv_ms − server_ts_ms`) | **263 ms** | 397 ms |
-| Chainlink TWAP 30s stream (`recv_ms − server_ts_ms`) | **234 ms** | 353 ms |
-| Chainlink instantaneous feed (`recv_ms − server_ts_ms`) | **273 ms** | 411 ms |
+| CLOB order book (`recv_ms − event_ts_ms`) | **10 ms** | 30 ms |
+| Top of book, unthrottled (`recv_ms − payload.timestamp`) | **9 ms** | 54 ms |
+| Chainlink TWAP 60s stream (`recv_ms − server_ts_ms`) | **246 ms** | 374 ms |
+| Chainlink TWAP 30s stream (`recv_ms − server_ts_ms`) | **216 ms** | 322 ms |
+| Chainlink instantaneous feed (`recv_ms − server_ts_ms`) | **262 ms** | 391 ms |
 
 Collection runs next to the venues' own infrastructure (`eu-west-1`). Every
 tick in this dataset carries all three timestamps, so you can verify the
@@ -154,37 +154,37 @@ Every market in this sample carries `raw.cryptoMarketConfig.twapEnabled = true`
 with a **60-second lookback**, so the governing rule is the current one: **Up
 wins when the TWAP value at the close is greater than or equal to the TWAP value
 at the open.** Both values are read from
-`BTCUSD-twap60s-prices-2026-09-04.csv.gz` at the exact boundary seconds, using
+`BTCUSD-twap60s-prices-2026-09-08.csv.gz` at the exact boundary seconds, using
 the full-precision integer column (`full_accuracy_value`) — no floating point
 anywhere in the comparison.
 
-On 2026-09-04 the BTC 5-minute series had **288 markets settling inside the
+On 2026-09-08 the BTC 5-minute series had **288 markets settling inside the
 day** (the file's other 4 rows close after midnight and settle in the next
 day's file):
 
 | | count | result |
 |---|---|---|
-| we hold the exact TWAP reports at both boundary seconds | 258 | **258 of 258 reproduce the official outcome** |
-| a boundary second is not present in this file | 30 | not independently provable — reported as undetermined |
+| we hold the exact TWAP reports at both boundary seconds | 253 | **253 of 253 reproduce the official outcome** |
+| a boundary second is not present in this file | 35 | not independently provable — reported as undetermined |
 
 We call a settlement reproducible only when we hold the exact boundary-second
 reports on **both** ends. A neighbouring tick is not proof of where the boundary
 actually landed, so those markets are reported as undetermined rather than
-counted as agreement — and of the 258 where we do hold both ends, every single
+counted as agreement — and of the 253 where we do hold both ends, every single
 one matches Polymarket.
 
 本样例中每个市场的 `raw.cryptoMarketConfig.twapEnabled` 均为 `true`、**回看 60 秒**，
 因此适用当前规则：**收盘时刻 TWAP 值 ≥ 开盘时刻 TWAP 值则 Up 赢**。两端取值均来自
-`BTCUSD-twap60s-prices-2026-09-04.csv.gz` 中精确边界秒的全精度整数列
+`BTCUSD-twap60s-prices-2026-09-08.csv.gz` 中精确边界秒的全精度整数列
 （`full_accuracy_value`），比较过程全程不使用浮点。
 
-2026-09-04 当天 BTC 5 分钟局共 **288 个在本日内结算的市场**（文件中另外 4 行收盘在
-午夜之后，于次日文件结算）：两端都持有精确边界秒 TWAP 报价的 **258 个，258/258
-全部与官方结果一致**；另有 30 个因某一端边界秒不在本文件内，按不可独立证明处理、
+2026-09-08 当天 BTC 5 分钟局共 **288 个在本日内结算的市场**（文件中另外 4 行收盘在
+午夜之后，于次日文件结算）：两端都持有精确边界秒 TWAP 报价的 **253 个，253/253
+全部与官方结果一致**；另有 35 个因某一端边界秒不在本文件内，按不可独立证明处理、
 不作判定。
 
 只有两端都持有精确边界秒报价，我们才称其可复现——邻近 tick 并不能证明边界究竟落在
-哪一侧，因此这类市场记为未判定而非算作一致。而这 258 个全部对得上。
+哪一侧，因此这类市场记为未判定而非算作一致。而这 253 个全部对得上。
 
 ## Coverage reporting / 覆盖情况报告
 
