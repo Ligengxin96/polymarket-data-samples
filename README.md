@@ -7,6 +7,20 @@ documentation**; the full dataset is sold by subscription or by range.
 本仓库提供 Polymarket 加密 Up/Down 市场数据的**免费样例与文档**；完整数据集
 按订阅或按区间出售。
 
+**Full dataset:** [outcometick.com](https://outcometick.com) — subscribe to the
+newest 30 days, or buy any date range once (priced per archived day). A key is
+issued at checkout and works with the [HTTP API](https://outcometick.com/docs).
+Strategy code can also run against the archive in a hosted sandbox at
+[/backtest](https://outcometick.com/backtest), nothing to download first.
+**Free:** the sample day below, and `ot run` replays it locally on the same
+engine — no key needed.
+
+**完整数据集：** [outcometick.com](https://outcometick.com/zh)——订阅最近 30 天，
+或一次性买断任意日期区间（按归档天计价）。付款后即发 key，配合
+[HTTP API](https://outcometick.com/zh/docs) 使用。策略代码也可以直接在
+[/backtest](https://outcometick.com/zh/backtest) 的托管沙箱里跑归档数据，不用先下载。
+**免费：** 下面的样例日，加上 `ot run` 本地重放，同一个引擎，不需要 key。
+
 > Also available: **[Predict.fun data](https://github.com/Ligengxin96/predict.fun-data-samples)**
 > — the prediction-market venue behind the Binance Wallet front end, collected
 > and sold separately (different venue, different settlement source).
