@@ -9,7 +9,7 @@ documentation**; the full dataset is sold by subscription or by range.
 
 **Full dataset:** [outcometick.com](https://outcometick.com) — subscribe to the
 newest 30 days, or buy any date range once (priced per archived day). A key is
-issued at checkout and works with the [HTTP API](https://outcometick.com/docs).
+issued at checkout and works with the [HTTP API](https://outcometick.com/docs/api).
 Strategy code can also run against the archive in a hosted sandbox at
 [/backtest](https://outcometick.com/backtest), nothing to download first.
 **Free:** the sample day below, and `ot run` replays it locally on the same
@@ -17,7 +17,7 @@ engine — no key needed.
 
 **完整数据集：** [outcometick.com](https://outcometick.com/zh)——订阅最近 30 天，
 或一次性买断任意日期区间（按归档天计价）。付款后即发 key，配合
-[HTTP API](https://outcometick.com/zh/docs) 使用。策略代码也可以直接在
+[HTTP API](https://outcometick.com/zh/docs/api) 使用。策略代码也可以直接在
 [/backtest](https://outcometick.com/zh/backtest) 的托管沙箱里跑归档数据，不用先下载。
 **免费：** 下面的样例日，加上 `ot run` 本地重放，同一个引擎，不需要 key。
 
@@ -46,6 +46,9 @@ engine — no key needed.
 - Every file comes with its size and SHA-256, so you can verify what you
   received; every price row carries its own timestamps, so gaps in the feed are
   measurable directly from the data
+- How the order-book, top-of-book and trade streams are captured, and what each
+  one can and cannot reconstruct: [Polymarket order book data](https://outcometick.com/polymarket-order-book-data)
+  / [Polymarket 盘口数据说明](https://outcometick.com/zh/polymarket-order-book-data)
 
 ### Settlement source change on 2026-08-07 / 结算源切换（2026-08-07）
 
@@ -65,7 +68,11 @@ The TWAP streams cannot be reconstructed exactly from the ~1Hz instantaneous
 ticks — Chainlink computes them from its internal higher-frequency data — which
 is why the dataset carries both lines. 2026-08-07 itself predates our TWAP
 collection; for that single day the official outcome labels in the `markets`
-files are the settlement authority.
+files are the settlement authority. The settlement rule, and how to recompute
+an outcome yourself, are written up in
+[how Polymarket Up/Down markets settle](https://outcometick.com/docs/settlement); the settlement
+price lines themselves are described under
+[Chainlink settlement price data](https://outcometick.com/chainlink-settlement-data).
 
 2026-08-07 00:00 UTC 起，Polymarket 加密 Up/Down 市场改用 Chainlink **TWAP**
 （时间加权均价）流结算：收盘 TWAP 值 ≥ 开盘 TWAP 值判 Up。**用哪条流结算写在市场
@@ -76,7 +83,9 @@ files are the settlement authority.
 2026-08-07 起的市场用 `twap` 文件，此前的市场用 `prices` 文件。** TWAP 流无法从
 约 1Hz 的瞬时 tick 精确重建（Chainlink 用其内部更高频数据计算），因此数据集同时
 提供两条线。2026-08-07 当天早于我们的 TWAP 采集起点，该天以 `markets` 文件中的
-官方结算标签为准。
+官方结算标签为准。结算规则与自行重算的方法见
+[Polymarket 涨跌市场怎么判定输赢](https://outcometick.com/zh/docs/settlement)；结算价流本身的说明见
+[Chainlink 结算价数据](https://outcometick.com/zh/chainlink-settlement-data)。
 
 ## Samples / 样例
 
@@ -147,7 +156,8 @@ in [`samples/manifest.json`](samples/manifest.json). Those checksums are the
 archive's own, so a sample verifies byte for byte against a delivered bundle.
 
 Field-level documentation: [`DATA_GUIDE.md`](DATA_GUIDE.md) (English) /
-[`数据使用说明.md`](数据使用说明.md) (中文).
+[`数据使用说明.md`](数据使用说明.md) (中文). The same column definitions online:
+[dataset schema reference](https://outcometick.com/docs/schemas) / [字段规格](https://outcometick.com/zh/docs/schemas).
 
 ## Capture latency / 采集延迟
 
@@ -232,6 +242,8 @@ feed 密度属上游发布方特性，采集端无法凭空补出，feed 确实�
 **[outcometick.com](https://outcometick.com)** — subscribe or buy a date range,
 then pull the data with your API key. It is the same archive these samples come
 from, scoped to exactly the assets, data types and dates you purchase.
+Weighing it against other sources? See [what to compare when choosing Polymarket
+data](https://outcometick.com/compare).
 
 Questions, or something not working:
 **[Telegram group](https://t.me/+TcK_hJOzOz5mZTk1)** ·
@@ -239,6 +251,7 @@ Questions, or something not working:
 
 **[outcometick.com](https://outcometick.com)** —— 按订阅或按日期区间购买，用 API
 key 自助取数。样例即取自同一份归档，购买后按你选择的币种、数据类型与日期范围开放。
+在和其他来源比较？见[选数据时该比什么](https://outcometick.com/zh/compare)。
 
 有疑问或遇到问题：**[Telegram 群](https://t.me/+TcK_hJOzOz5mZTk1)** ·
 **support@outcometick.com**
